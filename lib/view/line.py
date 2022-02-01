@@ -25,10 +25,9 @@ from astral.sun import sun
 
 import pytz
 
-from constants import WWO_CODE, WEATHER_SYMBOL, WEATHER_SYMBOL_WI_NIGHT, WEATHER_SYMBOL_WI_DAY, WIND_DIRECTION, WIND_DIRECTION_WI, WEATHER_SYMBOL_WIDTH_VTE, WEATHER_SYMBOL_PLAIN
+from constants import WWO_CODE, WEATHER_SYMBOL, WIND_DIRECTION, WEATHER_SYMBOL_WIDTH_VTE, WEATHER_SYMBOL_PLAIN
 from weather_data import get_weather_data
 from . import v2
-from . import v3
 from . import prometheus
 
 PRECONFIGURED_FORMAT = {
@@ -81,21 +80,8 @@ def render_condition(data, query):
     """Emoji encoded weather condition (c)
     """
 
-    if query.get("view") == "v2n":
-        weather_condition = WEATHER_SYMBOL_WI_NIGHT.get(
-                WWO_CODE.get(
-                    data['weatherCode'], "Unknown"))
-        spaces = "  "
-    elif query.get("view") == "v2d":
-        weather_condition = WEATHER_SYMBOL_WI_DAY.get(
-                WWO_CODE.get(
-                    data['weatherCode'], "Unknown"))
-        spaces = "  "
-    else:
-        weather_condition = WEATHER_SYMBOL.get(
-                WWO_CODE.get(
-                    data['weatherCode'], "Unknown"))
-        spaces = " "*(3 - WEATHER_SYMBOL_WIDTH_VTE.get(weather_condition, 1))
+    weather_condition = WEATHER_SYMBOL[WWO_CODE[data['weatherCode']]]
+    spaces = " "*(WEATHER_SYMBOL_WIDTH_VTE.get(weather_condition) - 1)
 
     return weather_condition + spaces
 
@@ -183,10 +169,7 @@ def render_wind(data, query):
         degree = ""
 
     if degree:
-        if query.get("view") in ["v2n", "v2d"]:
-            wind_direction = WIND_DIRECTION_WI[int(((degree+22.5)%360)/45.0)]
-        else:
-            wind_direction = WIND_DIRECTION[int(((degree+22.5)%360)/45.0)]
+        wind_direction = WIND_DIRECTION[int(((degree+22.5)%360)/45.0)]
     else:
         wind_direction = ""
 
@@ -375,18 +358,14 @@ def format_weather_data(query, parsed_query, data):
     if format_line in PRECONFIGURED_FORMAT:
         format_line = PRECONFIGURED_FORMAT[format_line]
 
-    if format_line in ["j1", "j2"]:
-        # j2 is a lightweight j1, without 'hourly' in 'weather' (weather forecast)
-        if "weather" in data["data"] and format_line == "j2":
-            for i in range(len(data["data"]["weather"])):
-                del data["data"]["weather"][i]["hourly"]
+    if format_line == "j1":
         return render_json(data['data'])
     if format_line == "p1":
         return prometheus.render_prometheus(data['data'])
     if format_line[:2] == "v2":
         return v2.main(query, parsed_query, data)
     if format_line[:2] == "v3":
-        return v3.main(query, parsed_query, data)
+        raise NotImplementedError()
 
     current_condition = data['data']['current_condition'][0]
     current_condition['location'] = parsed_query["location"]
