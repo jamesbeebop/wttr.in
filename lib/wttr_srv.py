@@ -33,7 +33,7 @@ import cache
 
 if not os.path.exists(os.path.dirname(LOG_FILE)):
     os.makedirs(os.path.dirname(LOG_FILE))
-logging.basicConfig(filename=LOG_FILE, level=logging.INFO, format='%(asctime)s %(message)s')
+logging.basicConfig(filename=LOG_FILE, level=logging.DEBUG, format='%(asctime)s %(message)s')
 
 LIMITS = Limits(whitelist=[MY_EXTERNAL_IP], limits=QUERY_LIMITS)
 

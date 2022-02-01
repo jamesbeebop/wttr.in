@@ -32,7 +32,7 @@ if "WTTR_AIRPORTS_DAT" in os.environ:
 else:
     AIRPORTS_DAT = os.path.join(_DATADIR, "airports.dat")
 
-WEGO = os.environ.get("WTTR_WEGO", os.path.join(MYDIR, 'bin', 'we-lang'))
+WEGO = os.environ.get("WTTR_WEGO", os.path.join(MYDIR, 'bin', 'wego'))
 PYPHOON = "pyphoon-lolcat"
 
 

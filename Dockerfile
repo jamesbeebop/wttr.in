@@ -50,6 +50,11 @@ RUN apt install -y \
     git \
     # Runtime deps
     gawk \
+    fonts-dejavu-core \
+    fonts-wqy-zenhei \
+    fonts-motoya-l-cedar \
+    fonts-lexi-gulim \
+    fonts-symbola \
     tzdata && \
     pip install -r requirements.txt --no-cache-dir && \
     apt remove -y \
