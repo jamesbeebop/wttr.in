@@ -82,7 +82,7 @@ def _wego_wrapper(location, parsed_query):
     else:
         location_name = parsed_query['override_location_name']
 
-    cmd = [WEGO, '--location=%s' % location]
+    cmd = [WEGO, '-l', '%s' % location_name]
 
     if parsed_query.get('inverted_colors'):
         cmd += ['-inverse']
@@ -97,7 +97,7 @@ def _wego_wrapper(location, parsed_query):
         cmd += ['-lang=%s'%lang]
 
     if parsed_query.get('use_imperial', False):
-        cmd += ['-imperial']
+        cmd += ['-u', 'imperial']
 
     logging.debug(f'wego cmd: "{cmd}"')
     proc = Popen(cmd, stdout=PIPE, stderr=PIPE)

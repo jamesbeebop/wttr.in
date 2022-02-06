@@ -17,10 +17,10 @@ You can access the service from a shell or from a Web browser like this:
     Weather for City: Paris, France
 
          \   /     Clear
-          .-.      10 – 11 °C  
-       ― (   ) ―   ↑ 11 km/h  
-          `-’      10 km  
-         /   \     0.0 mm  
+          .-.      10 – 11 °C
+       ― (   ) ―   ↑ 11 km/h
+          `-’      10 km
+         /   \     0.0 mm
 
 
 Here is an actual weather report for your location (it's live!):
@@ -397,7 +397,7 @@ Most of these values are self-explanatory, aside from `weatherCode`. The `weathe
 
 ### Prometheus Metrics Output
 
-The [Prometheus](https://github.com/prometheus/prometheus) Metrics format is a feature providing access to *wttr.in* data through an easy-to-parse format for monitoring systems, without requiring the user to create a complex script to reinterpret wttr.in's graphical output. 
+The [Prometheus](https://github.com/prometheus/prometheus) Metrics format is a feature providing access to *wttr.in* data through an easy-to-parse format for monitoring systems, without requiring the user to create a complex script to reinterpret wttr.in's graphical output.
 
 To fetch information in Prometheus format, use the following syntax:
 
@@ -587,13 +587,17 @@ because the MaxMind database is pretty good).
 * Install Docker
 * Build Docker Image
    ```
-   docker build . --build-arg geolite_license_key=************
+   docker build . --build-arg geolite_license_key=************ -t wttr:v0.1
    ```
 * These files should be mounted by the user at runtime:
-
 ```
 /root/.wegorc
 /root/.ip2location.key (optional)
+```
+* Command to start docker with the above (optional) tag and files mounted, and
+binding to port 8002
+```
+docker run -it --mount type=bind,source=/home/<user_id>/.wegorc,target=/root/.wegorc -p 8002:8002 wttr:v0.1
 ```
 
 ### Get a WorldWeatherOnline key and configure wego
