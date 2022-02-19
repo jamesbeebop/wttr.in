@@ -50,6 +50,8 @@ RUN apt install -y \
     git \
     # Runtime deps
     gawk \
+    vim \
+    procps \
     fonts-dejavu-core \
     fonts-wqy-zenhei \
     fonts-motoya-l-cedar \

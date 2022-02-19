@@ -45,14 +45,14 @@ def get_wetter(parsed_query):
         location_not_found = True
 
         not_found_header = """
->>>    _  _    ___  _  _     
->>>   | || |  / _ \| || |      
->>>   | || |_| | | | || |_      
->>>   |__   _| |_| |__   _|      
->>>      |_|  \___/   |_|    
->>>                       
+>>>    _  _    ___  _  _
+>>>   | || |  / _ \| || |
+>>>   | || |_| | | | || |_
+>>>   |__   _| |_| |__   _|
+>>>      |_|  \___/   |_|
+>>>
 >>>   404 %s: %s
->>>                 
+>>>
 """ % (get_message("UNKNOWN_LOCATION", lang).upper(), parsed_query['override_location_name'])
 
         not_found_header = "\n".join("\033[48;5;91m" + x + "   \033[0m"
@@ -83,6 +83,9 @@ def _wego_wrapper(location, parsed_query):
         location_name = parsed_query['override_location_name']
 
     cmd = [WEGO, '-l', '%s' % location_name]
+
+    if parsed_query.get('view'):
+        cmd += ['-f', 'json']
 
     if parsed_query.get('inverted_colors'):
         cmd += ['-inverse']

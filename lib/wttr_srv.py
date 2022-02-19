@@ -27,7 +27,8 @@ from location import is_location_blocked, location_processing
 from limits import Limits
 from view.wttr import get_wetter
 from view.moon import get_moon
-from view.line import wttr_line
+#from view.line import wttr_line
+from view.line_wego import wttr_line
 
 import cache
 
