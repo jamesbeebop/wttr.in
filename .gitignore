@@ -1,7 +1,9 @@
 ve/
+.env/
 share/static/fonts/
 *.pyc
 data/
+cache/
 log/
 .idea/
 *.swp

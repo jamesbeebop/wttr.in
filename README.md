@@ -4,11 +4,10 @@ wttr.in is a console-oriented weather forecast service that supports various inf
 representation methods like terminal-oriented ANSI-sequences for console HTTP clients
 (curl, httpie, or wget), HTML for web browsers, or PNG for graphical viewers.
 
-Originally started as a small project, a wrapper for [wego](https://github.com/schachmat/wego),
-intended to demonstrate the power of the console-oriented services,
-*wttr.in* became a popular weather reporting service, handling tens millions of queries daily.
+wttr.in uses [wego](http://github.com/schachmat/wego) for visualization
+and various data sources for weather forecast information.
 
-You can see it running here: [wttr.in](https://wttr.in).
+You can see it running here: [wttr.in](http://wttr.in).
 
 ## Usage
 
@@ -18,15 +17,15 @@ You can access the service from a shell or from a Web browser like this:
     Weather for City: Paris, France
 
          \   /     Clear
-          .-.      10 – 11 °C  
-       ― (   ) ―   ↑ 11 km/h  
-          `-’      10 km  
-         /   \     0.0 mm  
+          .-.      10 – 11 °C
+       ― (   ) ―   ↑ 11 km/h
+          `-’      10 km
+         /   \     0.0 mm
 
 
 Here is an actual weather report for your location (it's live!):
 
-![Weather Report](https://wttr.in/MyLocation.png?)
+![Weather Report](http://wttr.in/MyLocation.png?)
 
 (It's not your actual location - GitHub's CDN hides your real IP address with its own IP address,
 but it's still a live weather report in your language.)
@@ -34,7 +33,7 @@ but it's still a live weather report in your language.)
 Or in PowerShell:
 
 ```PowerShell
-Invoke-RestMethod https://wttr.in
+Invoke-RestMethod http://wttr.in
 ```
 
 Want to get the weather information for a specific location? You can add the desired location to the URL in your
@@ -71,7 +70,7 @@ You can also use IP-addresses (direct) or domain names (prefixed with `@`) to sp
     $ curl wttr.in/@github.com
     $ curl wttr.in/@msu.ru
 
-To get detailed information online, you can access the [/:help](https://wttr.in/:help) page:
+To get detailed information online, you can access the [/:help](http://wttr.in/:help) page:
 
     $ curl wttr.in/:help
 
@@ -79,18 +78,10 @@ To get detailed information online, you can access the [/:help](https://wttr.in/
 ### Weather Units
 
 By default the USCS units are used for the queries from the USA and the metric system for the rest of the world.
-You can override this behavior by adding `?u`, `?m` or `?M`   to a URL like this:
+You can override this behavior by adding `?u` or `?m` to a URL like this:
 
-    $ curl wttr.in/Amsterdam?u  # USCS (used by default in US)
-    $ curl wttr.in/Amsterdam?m  # metric (SI) (used by default everywhere except US)
-    $ curl wttr.in/Amsterdam?M  # metric (SI), but show wind speed in m/s
-
-If you have several options to pass, write them without delimiters in between for the one-letter options,
-and use `&` as a delimiter for the long options with values:
-
-    $ curl 'wttr.in/Amsterdam?m2&lang=nl`
-
-It would be a rough equivalent of `-m2 --lang nl` for the GNU CLI syntax.
+    $ curl wttr.in/Amsterdam?u
+    $ curl wttr.in/Amsterdam?m
 
 ## Supported output formats and views
 
@@ -341,7 +332,7 @@ Terminal with inline images protocols support:
 | mlterm                |   X11     |   yes         |   Sixel   |
 | kitty                 |   X11     |   yes         |   Kitty   |
 | wezterm               |   X11     |   yes         |   IIP     |
-| Darktile              |   X11     |   yes         |   Sixel   |
+| aminal                |   X11     |   yes         |   Sixel   |
 | Jexer                 |   X11     |   yes         |   Sixel   |
 | GNOME Terminal        |   X11     |   [in-progress](https://gitlab.gnome.org/GNOME/vte/-/issues/253) |   Sixel   |
 | alacritty             |   X11     |   [in-progress](https://github.com/alacritty/alacritty/issues/910) |  Sixel   |
@@ -406,7 +397,7 @@ Most of these values are self-explanatory, aside from `weatherCode`. The `weathe
 
 ### Prometheus Metrics Output
 
-The [Prometheus](https://github.com/prometheus/prometheus) Metrics format is a feature providing access to *wttr.in* data through an easy-to-parse format for monitoring systems, without requiring the user to create a complex script to reinterpret wttr.in's graphical output. 
+The [Prometheus](https://github.com/prometheus/prometheus) Metrics format is a feature providing access to *wttr.in* data through an easy-to-parse format for monitoring systems, without requiring the user to create a complex script to reinterpret wttr.in's graphical output.
 
 To fetch information in Prometheus format, use the following syntax:
 
@@ -506,7 +497,7 @@ The third option is to choose the language using the DNS name used in the query:
 
 wttr.in is currently translated into 54 languages, and the number of supported languages is constantly growing.
 
-See [/:translation](https://wttr.in/:translation) to learn more about the translation process,
+See [/:translation](http://wttr.in/:translation) to learn more about the translation process,
 to see the list of supported languages and contributors, or to know how you can help to translate wttr.in
 in your language.
 
@@ -518,7 +509,7 @@ There are currently two Windows related issues that prevent the examples found o
 
 ### Garbage characters in the output
 There is a limitation of the current Win32 version of `curl`. Until the [Win32 curl issue](https://github.com/chubin/wttr.in/issues/18#issuecomment-474145551) is resolved and rolled out in a future Windows release, it is recommended that you use Powershell’s `Invoke-Web-Request` command instead:
-- `(Invoke-WebRequest https://wttr.in).Content`
+- `(Invoke-WebRequest http://wttr.in).Content`
 
 ### Missing or double wide diagonal wind direction characters
 The second issue is regarding the width of the diagonal arrow glyphs that some Windows Terminal Applications such as the default `conhost.exe` use. At the time of writing this, `ConEmu.exe`, `ConEmu64.exe` and Terminal Applications built on top of ConEmu such as Cmder (`cmder.exe`) use these double-wide glyphs by default. The result is the same with all of these programs, either a missing character for certain wind directions or a broken table in the output or both. Some third-party Terminal Applications have addressed the wind direction glyph issue but that fix depends on the font and the Terminal Application you are using.
@@ -595,13 +586,18 @@ because the MaxMind database is pretty good).
 
 * Install Docker
 * Build Docker Image
+   ```
+   docker build . --build-arg geolite_license_key=************ -t wttr:v0.1
+   ```
 * These files should be mounted by the user at runtime:
-
 ```
 /root/.wegorc
 /root/.ip2location.key (optional)
-/app/airports.dat
-/app/GeoLite2-City.mmdb
+```
+* Command to start docker with the above (optional) tag and files mounted, and
+binding to port 8002
+```
+docker run -it --mount type=bind,source=/home/<user_id>/.wegorc,target=/root/.wegorc -p 8002:8002 wttr:v0.1
 ```
 
 ### Get a WorldWeatherOnline key and configure wego

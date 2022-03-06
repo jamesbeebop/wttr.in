@@ -18,6 +18,7 @@ import re
 import datetime
 import json
 import requests
+import logging
 
 from astral import LocationInfo
 from astral import moon
@@ -25,7 +26,7 @@ from astral.sun import sun
 
 import pytz
 
-from constants import WWO_CODE, WEATHER_SYMBOL, WIND_DIRECTION, WEATHER_SYMBOL_WIDTH_VTE, WEATHER_SYMBOL_PLAIN
+from constants import WEGO_CODE, WEATHER_SYMBOL, WIND_DIRECTION, WEATHER_SYMBOL_WIDTH_VTE, WEATHER_SYMBOL_PLAIN
 from weather_data import get_weather_data
 from view.wttr import get_wetter
 from . import v2
@@ -45,7 +46,12 @@ MOON_PHASES = (
 def convert_to_fahrenheit(temp):
     "Convert Celcius `temp` to Fahrenheit"
 
-    return (temp*9.0/5)+32
+    return round(temp*9.0/5, 1)+32
+
+def convert_to_mph(wind):
+    "Convert Kmph to mph"
+
+    return round(wind*0.6213711922, 1)
 
 def render_temperature(data, query):
     """
@@ -53,9 +59,9 @@ def render_temperature(data, query):
     """
 
     if query.get('use_imperial', False):
-        temperature = u'%s°F' % data['temp_F']
+        temperature = u'%s°F' % convert_to_fahrenheit(data['TempC'])
     else:
-        temperature = u'%s°C' % data['temp_C']
+        temperature = u'%s°C' % data['TempC']
 
     if temperature[0] != '-':
         temperature = '+' + temperature
@@ -68,7 +74,7 @@ def render_feel_like_temperature(data, query):
     """
 
     if query.get('use_imperial', False):
-        temperature = u'%s°F' % data['FeelsLikeF']
+        temperature = u'%s°F' % convert_to_fahrenheit(data['FeelsLikeC'])
     else:
         temperature = u'%s°C' % data['FeelsLikeC']
 
@@ -81,7 +87,7 @@ def render_condition(data, query):
     """Emoji encoded weather condition (c)
     """
 
-    weather_condition = WEATHER_SYMBOL[WWO_CODE[data['weatherCode']]]
+    weather_condition = WEATHER_SYMBOL[WEGO_CODE[data['Code']]]
     spaces = " "*(WEATHER_SYMBOL_WIDTH_VTE.get(weather_condition) - 1)
 
     return weather_condition + spaces
@@ -97,10 +103,11 @@ def render_condition_fullname(data, query):
             found = val
             break
     if not found:
-        found = data['weatherDesc']
+        found = data['Desc']
 
     try:
-        weather_condition = found[0]['value']
+        #weather_condition = found[0]['value']
+        weather_conditioni = found
     except KeyError:
         weather_condition = ''
 
@@ -110,7 +117,7 @@ def render_condition_plain(data, query):
     """Plain text weather condition (x)
     """
 
-    weather_condition = WEATHER_SYMBOL_PLAIN[WWO_CODE[data['weatherCode']]]
+    weather_condition = WEATHER_SYMBOL_PLAIN[WEGO_CODE[data['Code']]]
 
     return weather_condition
 
@@ -119,7 +126,7 @@ def render_humidity(data, query):
     humidity (h)
     """
 
-    humidity = data.get('humidity', '')
+    humidity = data.get('Humidity', '')
     if humidity:
         humidity += '%'
     return humidity
@@ -129,7 +136,7 @@ def render_precipitation(data, query):
     precipitation (p)
     """
 
-    answer = data.get('precipMM', '')
+    answer = data.get('PrecipM', '')
     if answer:
         answer += 'mm'
     return answer
@@ -139,7 +146,7 @@ def render_precipitation_chance(data, query):
     precipitation chance (o)
     """
 
-    answer = data.get('chanceofrain', '')
+    answer = data.get('ChanceOfRainPercent', '')
     if answer:
         answer += '%'
     return answer
@@ -160,7 +167,7 @@ def render_wind(data, query):
     """
 
     try:
-        degree = data["winddirDegree"]
+        degree = data["WinddirDegree"]
     except KeyError:
         degree = ""
 
@@ -176,13 +183,13 @@ def render_wind(data, query):
 
     if query.get('use_ms_for_wind', False):
         unit = 'm/s'
-        wind = u'%s%.1f%s' % (wind_direction, float(data['windspeedKmph'])/36.0*10.0, unit)
+        wind = u'%s%.1f%s' % (wind_direction, float(data['WindspeedKmph'])/36.0*10.0, unit)
     elif query.get('use_imperial', False):
         unit = 'mph'
-        wind = u'%s%s%s' % (wind_direction, data['windspeedMiles'], unit)
+        wind = u'%s%s%s' % (wind_direction, convert_to_mph(data['WindspeedKmph']), unit)
     else:
         unit = 'km/h'
-        wind = u'%s%s%s' % (wind_direction, data['windspeedKmph'], unit)
+        wind = u'%s%s%s' % (wind_direction, data['WindspeedKmph'], unit)
 
     return wind
 
@@ -352,23 +359,25 @@ def format_weather_data(query, parsed_query, data):
     with specified in `format_line` format
     """
 
-    if 'data' not in data:
-        return 'Unknown location; please try ~%s' % parsed_query["location"]
+    logging.debug('DATA keys: {}'.format(data.keys()))
+    #logging.debug('DATA passed to format_weather_data: {}'.format(data['Current']))
+    if 'Current' not in data:
+        return 'Unknown location in ONE LINE module; please try ~%s' % parsed_query["location"]
 
     format_line = parsed_query.get("view", "")
     if format_line in PRECONFIGURED_FORMAT:
         format_line = PRECONFIGURED_FORMAT[format_line]
 
     if format_line == "j1":
-        return render_json(data['data'])
+        return render_json(data['Current'])
     if format_line == "p1":
-        return prometheus.render_prometheus(data['data'])
+        return prometheus.render_prometheus(data['Current'])
     if format_line[:2] == "v2":
         return v2.main(query, parsed_query, data)
     if format_line[:2] == "v3":
         raise NotImplementedError()
 
-    current_condition = data['data']['current_condition'][0]
+    current_condition = data['Current']
     current_condition['location'] = parsed_query["location"]
     current_condition['override_location'] = parsed_query["override_location_name"]
     output = render_line(format_line, current_condition, query)
@@ -385,7 +394,8 @@ def wttr_line(query, parsed_query):
 
     #data = get_weather_data(location, lang)
     data = get_wetter(parsed_query)
-    print('Queried wttr_line with parsed_query: {} \n and received {} in response'.format(parsed_query, data))
+    data = data.split('}Location')[0] + '}'
+    data = json.loads(data)
 
     output = format_weather_data(query, parsed_query, data)
     return output

@@ -1,5 +1,27 @@
 #vim: fileencoding=utf-8
 
+WEGO_CODE = {
+        0: "Unknown",
+        1: "Cloudy",
+        2: "Fog",
+        3: "HeavyRain",
+        4: "HeavyShowers",
+        5: "HeavySnow",
+        6: "HeavySnowShowers",
+        7: "LightRain",
+        8: "LightShowers",
+        9: "LightSleet",
+        10: "LightSleetShowers",
+        11: "LightSnow",
+        12: "LightSnowShowers",
+        13: "PartlyCloudy",
+        14: "Sunny",
+        15: "ThunderyHeavyRain",
+        16: "ThunderyShowers",
+        17: "ThunderySnowShowers",
+        18: "VeryCloudy"
+        }
+
 WWO_CODE = {
     "113": "Sunny",
     "116": "PartlyCloudy",
